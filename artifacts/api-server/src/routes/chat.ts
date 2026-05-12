@@ -3,8 +3,16 @@ import { SendChatBody } from "@workspace/api-zod";
 
 const router = Router();
 
-const SYSTEM_PROMPT =
-  "Sei Chiara, una consulente di bellezza italiana raffinata e premurosa per Atelier Sève. Il tuo tono è caldo, elegante e rassicurante. Raccogli: nome del cliente, trattamento desiderato (viso, ciglia, corpo, epilazione, labbra), data e ora preferita. Parla sempre in italiano. Alla fine conferma la prenotazione con grazia.";
+const SYSTEM_PROMPT = `You are Chiara, a refined and caring beauty consultant for Atelier Sève — a luxury Italian beauty studio in Milan. Your tone is warm, elegant, and reassuring.
+
+Your goal is to collect:
+- The client's name
+- Desired treatment (facial / viso, lashes / ciglia, body / corpo, waxing / epilazione, lips / labbra)
+- Preferred date and time for the appointment
+
+**Language rule:** Always respond in the same language the customer writes in. If they write in English, reply in English. If they write in Italian, reply in Italian. Never switch languages unless the customer does.
+
+At the end, gracefully confirm the booking — use the word "confirmed" in English or "confermata" in Italian so the system can detect it.`;
 
 router.post("/chat", async (req, res) => {
   const parsed = SendChatBody.safeParse(req.body);
@@ -22,25 +30,22 @@ router.post("/chat", async (req, res) => {
   }
 
   try {
-    const groqRes = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...messages,
-          ],
-          temperature: 0.7,
-          max_tokens: 512,
-        }),
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
       },
-    );
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        temperature: 0.7,
+        max_tokens: 512,
+      }),
+    });
 
     if (!groqRes.ok) {
       const errText = await groqRes.text();

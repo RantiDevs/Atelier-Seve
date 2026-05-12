@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { useLanguage } from "@/LanguageContext";
 
 export function Hero() {
+  const { lang, t } = useLanguage();
   const title1Ref = useRef<HTMLHeadingElement>(null);
   const title2Ref = useRef<HTMLHeadingElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
@@ -11,26 +13,17 @@ export function Hero() {
   useEffect(() => {
     const tl = gsap.timeline({ delay: 0.2 });
 
-    // Logo fade in
     if (logoRef.current) {
       tl.fromTo(logoRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0);
     }
-
-    // Blob scale in
     if (blobRef.current) {
       tl.fromTo(blobRef.current, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.4, ease: "power3.out" }, 0);
     }
-
-    // Line expansion
     if (lineRef.current) {
       tl.to(lineRef.current, { scaleX: 1, duration: 0.6, ease: "power2.out" }, 0.2);
     }
 
-    // Word reveal
-    const animateWords = (
-      ref: React.RefObject<HTMLHeadingElement | null>,
-      startTime: number
-    ) => {
+    const animateWords = (ref: React.RefObject<HTMLHeadingElement | null>, startTime: number) => {
       if (!ref.current) return;
       const text = ref.current.innerText;
       const words = text.split(" ");
@@ -53,11 +46,10 @@ export function Hero() {
 
     animateWords(title1Ref, 0.4);
     animateWords(title2Ref, 0.6);
-  }, []);
+  }, [lang]);
 
   return (
     <section className="relative flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
-      {/* Grain overlay */}
       <div className="pointer-events-none absolute inset-0 z-50 opacity-[0.04] mix-blend-overlay">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
           <filter id="noiseFilter">
@@ -67,12 +59,11 @@ export function Hero() {
         </svg>
       </div>
 
-      {/* Left — espresso */}
       <div
         className="flex w-full md:w-1/2 flex-col items-start justify-center p-8 md:p-16 lg:p-24 relative z-10 min-h-[55vh] md:min-h-screen"
         style={{ backgroundColor: "#1C1210" }}
       >
-        <div ref={logoRef} className="mb-16 opacity-0" data-testid="hero-logo">
+        <div ref={logoRef} className="mb-16 opacity-0">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="20" cy="20" r="19" stroke="#C9A06E" strokeWidth="2" />
             <path d="M20 10V30M10 20H30" stroke="#C9A06E" strokeWidth="2" />
@@ -85,14 +76,14 @@ export function Hero() {
             className="font-serif text-5xl md:text-7xl lg:text-8xl italic leading-tight"
             style={{ color: "#F9F4EE" }}
           >
-            La Bellezza
+            {t.hero.line1}
           </h1>
           <h1
             ref={title2Ref}
             className="font-serif text-5xl md:text-7xl lg:text-8xl italic leading-tight"
             style={{ color: "#F9F4EE" }}
           >
-            è un Rituale.
+            {t.hero.line2}
           </h1>
         </div>
 
@@ -103,14 +94,11 @@ export function Hero() {
         />
 
         <button
-          onClick={() =>
-            document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })
-          }
+          onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
           className="group relative font-sans text-sm tracking-widest uppercase transition-colors"
           style={{ color: "#C9A06E" }}
-          data-testid="hero-cta"
         >
-          Scopri i Trattamenti
+          {t.hero.cta}
           <span
             className="absolute -bottom-2 left-0 h-[1px] w-full origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100"
             style={{ backgroundColor: "#C9A06E" }}
@@ -118,26 +106,15 @@ export function Hero() {
         </button>
       </div>
 
-      {/* Right — cream + morphing blob */}
       <div
         className="relative w-full h-[45vh] md:h-auto md:w-1/2 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: "#F9F4EE" }}
       >
-        {/* Subtle radial gradient background */}
         <div
           className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(232,196,184,0.5) 0%, transparent 70%)",
-          }}
+          style={{ background: "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(232,196,184,0.5) 0%, transparent 70%)" }}
         />
-
-        {/* Morphing blob */}
-        <div
-          ref={blobRef}
-          className="relative w-72 h-72 md:w-96 md:h-96"
-          style={{ transformOrigin: "center center" }}
-        >
+        <div ref={blobRef} className="relative w-72 h-72 md:w-96 md:h-96" style={{ transformOrigin: "center center" }}>
           <svg
             viewBox="0 0 400 400"
             xmlns="http://www.w3.org/2000/svg"
@@ -150,17 +127,8 @@ export function Hero() {
                 <stop offset="50%" stopColor="#C9A06E" />
                 <stop offset="100%" stopColor="#9E7B7B" />
               </radialGradient>
-              <filter id="blobBlur">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
             </defs>
-            <path
-              fill="url(#blobGradient)"
-              style={{
-                animation: "morphBlob 8s ease-in-out infinite",
-              }}
-            >
+            <path fill="url(#blobGradient)">
               <animate
                 attributeName="d"
                 dur="8s"
@@ -173,28 +141,16 @@ export function Hero() {
                 "
               />
             </path>
-            {/* Specular highlight */}
             <ellipse
-              cx="155"
-              cy="140"
-              rx="45"
-              ry="30"
+              cx="155" cy="140" rx="45" ry="30"
               fill="rgba(255,255,255,0.18)"
               style={{ mixBlendMode: "overlay" }}
               transform="rotate(-20, 155, 140)"
             />
           </svg>
         </div>
-
-        {/* Subtle decorative dots */}
-        <div
-          className="absolute bottom-12 right-12 w-2 h-2 rounded-full"
-          style={{ backgroundColor: "#C9A06E", opacity: 0.5 }}
-        />
-        <div
-          className="absolute top-16 left-16 w-1 h-1 rounded-full"
-          style={{ backgroundColor: "#9E7B7B", opacity: 0.4 }}
-        />
+        <div className="absolute bottom-12 right-12 w-2 h-2 rounded-full" style={{ backgroundColor: "#C9A06E", opacity: 0.5 }} />
+        <div className="absolute top-16 left-16 w-1 h-1 rounded-full" style={{ backgroundColor: "#9E7B7B", opacity: 0.4 }} />
       </div>
     </section>
   );
