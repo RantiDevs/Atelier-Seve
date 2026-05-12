@@ -3,6 +3,8 @@ import { Marquee } from "@/components/Marquee";
 import { IntroStatement } from "@/components/IntroStatement";
 import { Services } from "@/components/Services";
 import { ThreeRitual } from "@/components/ThreeRitual";
+import { ProductShowcase } from "@/components/ProductShowcase";
+import { MakeupSequence } from "@/components/MakeupSequence";
 import { IntakeForm } from "@/components/IntakeForm";
 import { Testimonials } from "@/components/Testimonials";
 import { LoyaltyOffers } from "@/components/LoyaltyOffers";
@@ -19,7 +21,9 @@ export default function HomePage() {
       <Marquee />
       <IntroStatement />
       <Services />
+      <ProductShowcase />
       <ThreeRitual />
+      <MakeupSequence />
       <IntakeForm />
       <Testimonials />
       <LoyaltyOffers />

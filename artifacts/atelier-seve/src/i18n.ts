@@ -26,6 +26,23 @@ export const translations = {
       heading: "Il Nostro Rituale",
       steps: ["Deterge", "Nutre", "Illumina", "Protegge"],
     },
+    productShowcase: {
+      heading: "I Nostri Prodotti",
+      subheading: "Qualità che si vede, si sente, si ama.",
+      rotateHint: "Scorri per ruotare",
+      liquidLabel: "Siero Illuminante",
+      swatches: [
+        { name: "Rosa Seta", hex: "#E8C4B8" },
+        { name: "Ruggine Dorata", hex: "#C9A06E" },
+        { name: "Mauve Scuro", hex: "#9E7B7B" },
+        { name: "Corallo Antico", hex: "#C67B5C" },
+        { name: "Nudo Champagne", hex: "#D4B483" },
+      ],
+    },
+    makeupSequence: {
+      heading: "L'Arte del Trucco",
+      steps: ["Pelle Nuda", "Foundation", "Blush", "Eyeliner", "Labbra"],
+    },
     intake: {
       heading: "Prima di Te",
       subheading: "Raccontaci di te, personalizziamo ogni trattamento.",
@@ -135,6 +152,23 @@ export const translations = {
     ritual: {
       heading: "Our Ritual",
       steps: ["Cleanse", "Nourish", "Illuminate", "Protect"],
+    },
+    productShowcase: {
+      heading: "Our Products",
+      subheading: "Quality you can see, feel and love.",
+      rotateHint: "Scroll to rotate",
+      liquidLabel: "Illuminating Serum",
+      swatches: [
+        { name: "Silk Rose", hex: "#E8C4B8" },
+        { name: "Golden Rust", hex: "#C9A06E" },
+        { name: "Deep Mauve", hex: "#9E7B7B" },
+        { name: "Antique Coral", hex: "#C67B5C" },
+        { name: "Nude Champagne", hex: "#D4B483" },
+      ],
+    },
+    makeupSequence: {
+      heading: "The Art of Makeup",
+      steps: ["Bare Skin", "Foundation", "Blush", "Eyeliner", "Lips"],
     },
     intake: {
       heading: "Before You Arrive",

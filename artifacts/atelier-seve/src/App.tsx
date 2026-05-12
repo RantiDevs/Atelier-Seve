@@ -6,6 +6,8 @@ import NotFound from "@/pages/not-found";
 import { CustomCursor } from "@/components/CustomCursor";
 import HomePage from "@/pages/HomePage";
 import { LanguageProvider, useLanguage } from "./LanguageContext";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
@@ -40,8 +42,11 @@ function Router() {
 }
 
 function App() {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <LanguageProvider>
+      {!loaded && <LoadingScreen onDone={() => setLoaded(true)} />}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
