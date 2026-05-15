@@ -11,8 +11,13 @@ import { useEffect, useState } from "react";
 import Lenis from "@studio-freight/lenis";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import gsap from "gsap";
+import { setBaseUrl } from "@workspace/api-client-react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+if (import.meta.env.VITE_API_URL) {
+  setBaseUrl(import.meta.env.VITE_API_URL);
+}
 
 const queryClient = new QueryClient();
 
