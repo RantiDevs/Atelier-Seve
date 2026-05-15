@@ -13,30 +13,46 @@ function Slider({ title, before, after, index }: { title: string; before: string
     setSliderPosition(Math.max(0, Math.min(100, (x / rect.width) * 100)));
   };
 
-  const handleMouseMove = (e: MouseEvent) => { if (isDragging) handleMove(e.clientX); };
-  const handleTouchMove = (e: TouchEvent) => { if (isDragging) handleMove(e.touches[0].clientX); };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    // Only use hover-tracking on desktop (when not dragging)
+    if (!isDragging) {
+      handleMove(e.clientX);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging) {
+      setSliderPosition(50);
+    }
+  };
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("touchmove", handleTouchMove);
+      const onGlobalMove = (e: MouseEvent) => handleMove(e.clientX);
+      const onGlobalTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
+      
+      window.addEventListener("mousemove", onGlobalMove);
+      window.addEventListener("touchmove", onGlobalTouchMove);
       window.addEventListener("mouseup", () => setIsDragging(false));
       window.addEventListener("touchend", () => setIsDragging(false));
+      
+      return () => {
+        window.removeEventListener("mousemove", onGlobalMove);
+        window.removeEventListener("touchmove", onGlobalTouchMove);
+        window.removeEventListener("mouseup", () => setIsDragging(false));
+        window.removeEventListener("touchend", () => setIsDragging(false));
+      };
     }
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("mouseup", () => setIsDragging(false));
-      window.removeEventListener("touchend", () => setIsDragging(false));
-    };
   }, [isDragging]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <h3 className="font-serif italic text-xl text-foreground text-center">{title}</h3>
+    <div className="flex flex-col gap-4 group/slider">
+      <h3 className="font-serif italic text-xl text-foreground text-center group-hover/slider:text-secondary transition-colors duration-500">{title}</h3>
       <div
         ref={containerRef}
-        className="relative w-full aspect-[3/4] overflow-hidden select-none cursor-ew-resize bg-muted rounded-md"
+        className="relative w-full aspect-[3/4] overflow-hidden select-none cursor-none sm:cursor-ew-resize bg-muted rounded-md"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         onMouseDown={(e) => { setIsDragging(true); handleMove(e.clientX); }}
         onTouchStart={(e) => { setIsDragging(true); handleMove(e.touches[0].clientX); }}
       >
@@ -68,11 +84,18 @@ function Slider({ title, before, after, index }: { title: string; before: string
           />
           <span className="absolute top-4 left-4 font-sans text-xs uppercase tracking-widest text-white drop-shadow-md font-bold">{before}</span>
         </div>
-        <div className="absolute top-0 bottom-0 w-0.5 bg-border pointer-events-none" style={{ left: `${sliderPosition}%` }}>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-border shadow-lg flex items-center justify-center">
-            <div className="w-1 h-3 bg-background mx-0.5 rounded-full" />
-            <div className="w-1 h-3 bg-background mx-0.5 rounded-full" />
+        <div 
+          className="absolute top-0 bottom-0 w-[1.5px] bg-[#C9A06E] pointer-events-none z-20 transition-transform duration-200 ease-out" 
+          style={{ left: `${sliderPosition}%` }}
+        >
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/20 backdrop-blur-md border border-[#C9A06E]/50 shadow-[0_0_20px_rgba(201,160,110,0.3)] flex items-center justify-center group-hover/slider:scale-110 transition-transform duration-500">
+            <div className="flex gap-1">
+              <div className="w-0.5 h-3 bg-[#C9A06E] rounded-full" />
+              <div className="w-0.5 h-3 bg-[#C9A06E] rounded-full" />
+            </div>
           </div>
+          {/* Subtle glow line */}
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-[#C9A06E]/20 to-transparent blur-[2px]" />
         </div>
       </div>
     </div>

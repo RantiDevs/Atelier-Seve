@@ -71,7 +71,7 @@ function RotatingBottle({ rotationDeg }: { rotationDeg: number }) {
       <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={40} />
       <ambientLight intensity={0.5} />
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
-      <Environment preset="city" />
+      <Environment preset="studio" />
       <Float speed={2} rotationIntensity={0.1} floatIntensity={0.5}>
         <ThreeBottle rotationY={rotationDeg} />
       </Float>
