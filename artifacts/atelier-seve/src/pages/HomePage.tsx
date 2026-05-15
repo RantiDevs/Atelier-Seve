@@ -1,5 +1,4 @@
 import { Hero } from "@/components/Hero";
-import { Marquee } from "@/components/Marquee";
 import { IntroStatement } from "@/components/IntroStatement";
 import { Services } from "@/components/Services";
 import { ThreeRitual } from "@/components/ThreeRitual";
@@ -18,7 +17,6 @@ export default function HomePage() {
   return (
     <main className="min-h-[100dvh] w-full bg-background text-foreground overflow-x-hidden selection:bg-secondary selection:text-foreground">
       <Hero />
-      <Marquee />
       <IntroStatement />
       <Services />
       <ProductShowcase />

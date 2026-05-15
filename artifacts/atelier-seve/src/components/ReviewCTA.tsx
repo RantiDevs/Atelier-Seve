@@ -20,7 +20,7 @@ export function ReviewCTA() {
         scrollTrigger: { trigger: containerRef.current, start: "top 75%" },
       }
     );
-    return () => { ScrollTrigger.getAll().forEach((s) => s.kill()); };
+    return () => {  };
   }, [t]);
 
   return (

@@ -85,6 +85,7 @@ export const translations = {
     },
     beforeAfter: {
       heading: "Trasformazioni Reali",
+      subheading: "Sfoglia i risultati autentici dei nostri trattamenti più amati.",
       before: "Prima",
       after: "Dopo",
       sliders: ["Laminazione Ciglia", "Pulizia Viso Profonda", "Trattamento Labbra"],
@@ -212,6 +213,7 @@ export const translations = {
     },
     beforeAfter: {
       heading: "Real Transformations",
+      subheading: "Browse authentic results from our most popular treatments.",
       before: "Before",
       after: "After",
       sliders: ["Lash Lamination", "Deep Facial Cleanse", "Lip Treatment"],

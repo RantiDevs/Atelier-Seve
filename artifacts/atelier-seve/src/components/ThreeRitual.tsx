@@ -17,103 +17,138 @@ export function ThreeRitual() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    if (titleRef.current) {
-      gsap.fromTo(titleRef.current, { opacity: 0, y: 30 }, {
-        opacity: 1, y: 0, duration: 0.8, ease: "power2.out",
-        scrollTrigger: { trigger: titleRef.current, start: "top 85%" },
-      });
-    }
-    if (bottleRef.current) {
-      gsap.fromTo(bottleRef.current, { opacity: 0, y: 60 }, {
-        opacity: 1, y: 0, duration: 1, ease: "power3.out",
-        scrollTrigger: { trigger: containerRef.current, start: "top 70%" },
-      });
-    }
+    const ctx = gsap.context(() => {
+      if (titleRef.current) {
+        gsap.fromTo(titleRef.current, { opacity: 0, y: 30 }, {
+          opacity: 1, y: 0, duration: 0.8, ease: "power2.out",
+          scrollTrigger: { trigger: titleRef.current, start: "top 85%" },
+        });
+      }
 
-    const trigger = ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top 60%",
-      end: "bottom 30%",
-      onUpdate: (self) => {
-        setActiveStep(Math.min(Math.floor(self.progress * 4) - 1, 3));
-        if (capRef.current) {
-          capRef.current.style.transform = `translateY(${-Math.min(self.progress * 6, 1) * 48}px)`;
+      // Main pinning timeline
+      const mainTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=1500",
+          pin: true,
+          scrub: 1,
+          onUpdate: (self) => {
+            setActiveStep(Math.min(Math.floor(self.progress * 4), 3));
+          }
         }
-        if (dropletRef.current) {
-          const fp = Math.min(Math.max(0, self.progress * 6 - 2), 1);
-          dropletRef.current.style.transform = `translateY(${-fp * 80}px) scale(${1 + fp * 0.3})`;
-          dropletRef.current.style.opacity = `${0.3 + fp * 0.7}`;
-        }
-      },
+      });
+
+      // Animate lid
+      mainTl.to(capRef.current, {
+        rotateX: -110,
+        ease: "none"
+      }, 0);
+
+      // Animate puff
+      mainTl.fromTo(dropletRef.current, 
+        { y: 0, opacity: 0, scale: 0.8 },
+        { y: -60, opacity: 1, scale: 1.2, ease: "power2.out" },
+        0.3
+      );
+
+      // Background color change
+      mainTl.to(containerRef.current, {
+        backgroundColor: "#E8C4B8",
+        ease: "none"
+      }, 0);
     });
 
-    gsap.to(containerRef.current, {
-      backgroundColor: "#E8C4B8",
-      scrollTrigger: { trigger: containerRef.current, start: "top 60%", end: "bottom 30%", scrub: true },
-    });
-
-    return () => { trigger.kill(); ScrollTrigger.getAll().forEach((s) => s.kill()); };
+    return () => ctx.revert();
   }, [lang]);
 
   return (
     <section
       ref={containerRef}
-      className="relative w-full py-32 overflow-hidden"
+      className="relative w-full py-32 overflow-hidden flex flex-col items-center justify-center"
       style={{ backgroundColor: "#F9F4EE", minHeight: "100vh" }}
     >
       <h2
         ref={titleRef}
-        className="font-serif text-4xl md:text-6xl italic text-center mb-24 opacity-0"
+        className="font-serif text-3xl sm:text-4xl md:text-6xl italic text-center mb-16 md:mb-24 opacity-0 px-4"
         style={{ color: "#1C1210" }}
       >
         {t.ritual.heading}
       </h2>
 
-      <div className="flex flex-col items-center justify-center gap-16 px-6">
-        <div ref={bottleRef} className="relative flex flex-col items-center opacity-0" style={{ height: "280px", width: "120px" }}>
+      <div className="flex flex-col items-center justify-center gap-12 md:gap-16 px-6 w-full max-w-5xl mx-auto scale-[0.8] sm:scale-100">
+        <div ref={bottleRef} className="relative flex flex-col items-center" style={{ perspective: "1000px", width: "200px", height: "200px" }}>
+          {/* Box Base */}
           <div
-            ref={capRef}
-            className="relative z-20"
+            className="absolute bottom-0 w-full"
             style={{
-              width: "76px", height: "36px", backgroundColor: "#F9F4EE",
-              borderRadius: "12px 12px 0 0",
-              boxShadow: "0 -2px 16px rgba(201,160,110,0.25), inset 0 1px 0 rgba(255,255,255,0.6)",
-              border: "1px solid rgba(201,160,110,0.3)",
-              transition: "transform 0.1s linear",
-            }}
-          />
-          <div
-            className="relative z-10 flex items-center justify-center overflow-hidden"
-            style={{
-              width: "72px", height: "200px", borderRadius: "4px 4px 20px 20px",
-              background: "linear-gradient(160deg, rgba(249,244,238,0.85) 0%, rgba(232,196,184,0.6) 40%, rgba(158,123,123,0.3) 100%)",
-              border: "1px solid rgba(201,160,110,0.35)",
-              backdropFilter: "blur(8px)",
-              boxShadow: "inset 12px 0 20px rgba(255,255,255,0.4), 0 8px 40px rgba(201,160,110,0.2)",
+              height: "50px",
+              backgroundColor: "#2a1a14",
+              borderRadius: "20px",
+              boxShadow: "0 30px 60px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.1)",
+              border: "1px solid #3a2818",
+              transformStyle: "preserve-3d",
             }}
           >
+            {/* Inside Powder */}
             <div
-              className="absolute top-4 left-3"
-              style={{ width: "12px", height: "80px", borderRadius: "6px", background: "linear-gradient(180deg, rgba(255,255,255,0.7) 0%, transparent 100%)", transform: "skewX(-8deg)" }}
+              className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[1px]"
+              style={{
+                width: "150px", height: "150px",
+                backgroundColor: "#e0b898",
+                borderRadius: "50%",
+                transform: "rotateX(90deg)",
+                boxShadow: "inset 0 0 30px rgba(0,0,0,0.2)",
+              }}
             />
-            <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 text-center" style={{ color: "rgba(28,18,16,0.35)", fontSize: "8px", letterSpacing: "0.15em", fontFamily: "serif", fontStyle: "italic" }}>
-              Atelier<br />Sève
-            </div>
           </div>
+
+          {/* Box Lid */}
+          <div
+            ref={capRef}
+            className="absolute bottom-[50px] w-full"
+            style={{
+              height: "180px",
+              backgroundColor: "#1a0e0a",
+              borderRadius: "20px",
+              transformOrigin: "bottom center",
+              boxShadow: "inset 0 1px 1px rgba(255,255,255,0.2), 0 -10px 30px rgba(201,160,110,0.15)",
+              border: "1px solid #3a2818",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {/* Mirror inside lid */}
+            <div
+              className="absolute inset-5 rounded-full"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)",
+                backdropFilter: "blur(4px)",
+                border: "2px solid #C9A06E",
+                transform: "translateZ(1px)",
+              }}
+            />
+          </div>
+          
+          {/* Puff emerging */}
           <div
             ref={dropletRef}
             className="absolute z-30"
             style={{
-              width: "20px", height: "20px", borderRadius: "50% 50% 50% 0",
-              backgroundColor: "#C9A06E", transform: "rotate(-45deg)",
-              bottom: "80px", left: "50%", marginLeft: "-10px",
-              opacity: 0.3, boxShadow: "0 0 16px rgba(201,160,110,0.6)",
-              transition: "transform 0.1s linear, opacity 0.1s linear",
+              width: "120px", height: "120px", borderRadius: "50%",
+              backgroundColor: "#F9F4EE",
+              bottom: "50px", left: "50%", marginLeft: "-60px",
+              opacity: 0, boxShadow: "0 15px 30px rgba(0,0,0,0.3), inset 0 -10px 30px rgba(0,0,0,0.1)",
+              display: "flex", alignItems: "center", justifyCenter: "center"
             }}
-          />
+          >
+             <span className="font-serif italic text-[#C9A06E] text-xs font-bold tracking-widest">A S</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 w-full max-w-3xl">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-16 w-full max-w-4xl px-4">
           {t.ritual.steps.map((label, i) => (
             <div
               key={i}

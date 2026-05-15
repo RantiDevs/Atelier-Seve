@@ -11,15 +11,17 @@ export function Services() {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const rows = containerRef.current.querySelectorAll(".service-row");
-    rows.forEach((row) => {
-      gsap.fromTo(
-        row,
-        { clipPath: "inset(0 100% 0 0)" },
-        { clipPath: "inset(0 0% 0 0)", ease: "power3.inOut", duration: 1.2, scrollTrigger: { trigger: row, start: "top 85%" } }
-      );
+    const ctx = gsap.context(() => {
+      const rows = containerRef.current?.querySelectorAll(".service-row");
+      rows?.forEach((row) => {
+        gsap.fromTo(
+          row,
+          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(0 0% 0 0)", ease: "power3.inOut", duration: 1.2, scrollTrigger: { trigger: row, start: "top 85%" } }
+        );
+      });
     });
-    return () => { ScrollTrigger.getAll().forEach((s) => s.kill()); };
+    return () => ctx.revert();
   }, [lang]);
 
   return (
@@ -35,7 +37,15 @@ export function Services() {
               key={service.title}
               className={`service-row flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-8 md:gap-16`}
             >
-              <div className="w-full md:w-1/2 aspect-[4/3] bg-gradient-to-br from-secondary to-muted relative overflow-hidden group">
+              <div className="w-full md:w-1/2 aspect-[4/3] relative overflow-hidden group rounded-xl">
+                <img
+                  src={`/treatments/treatment-${index + 1}.png`}
+                  alt={service.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1470&auto=format&fit=crop`; // fallback
+                  }}
+                />
                 <div className="absolute inset-0 bg-foreground/5 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
               <div className="w-full md:w-1/2 flex flex-col items-start justify-center">

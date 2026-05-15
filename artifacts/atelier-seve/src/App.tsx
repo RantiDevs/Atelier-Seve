@@ -7,30 +7,16 @@ import { CustomCursor } from "@/components/CustomCursor";
 import HomePage from "@/pages/HomePage";
 import { LanguageProvider, useLanguage } from "./LanguageContext";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Lenis from "@studio-freight/lenis";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import gsap from "gsap";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const queryClient = new QueryClient();
 
-function LangToggle() {
-  const { lang, toggleLang } = useLanguage();
-  return (
-    <button
-      onClick={toggleLang}
-      className="fixed top-5 right-5 z-[60] flex items-center gap-1 font-sans text-xs tracking-widest uppercase px-3 py-1.5 rounded-full border transition-all duration-300"
-      style={{
-        borderColor: "rgba(201,160,110,0.5)",
-        backgroundColor: "rgba(28,18,16,0.82)",
-        color: "#C9A06E",
-        backdropFilter: "blur(8px)",
-      }}
-      aria-label="Switch language"
-    >
-      <span style={{ opacity: lang === "it" ? 1 : 0.4, transition: "opacity 0.2s" }}>IT</span>
-      <span style={{ color: "rgba(201,160,110,0.35)", margin: "0 2px" }}>|</span>
-      <span style={{ opacity: lang === "en" ? 1 : 0.4, transition: "opacity 0.2s" }}>EN</span>
-    </button>
-  );
-}
+import { Navbar } from "@/components/Navbar";
 
 function Router() {
   return (
@@ -44,14 +30,54 @@ function Router() {
 function App() {
   const [loaded, setLoaded] = useState(false);
 
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.6,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      syncTouch: true,
+      orientation: "vertical",
+    });
+
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        return arguments.length ? lenis.scrollTo(value as number, { immediate: true }) : lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+      },
+      pinType: document.body.style.transform ? "transform" : "fixed",
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+    const raf = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    const id = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loaded) {
+      // Force a refresh once content is fully visible
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 100);
+    }
+  }, [loaded]);
+
   return (
     <LanguageProvider>
       {!loaded && <LoadingScreen onDone={() => setLoaded(true)} />}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}> 
             <CustomCursor />
-            <LangToggle />
+            <Navbar />
             <Router />
           </WouterRouter>
           <Toaster />

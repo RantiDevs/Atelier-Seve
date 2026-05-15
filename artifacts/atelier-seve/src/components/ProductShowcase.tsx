@@ -5,62 +5,78 @@ import { useLanguage } from "@/LanguageContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function RotatingLipstick({ rotationDeg }: { rotationDeg: number }) {
-  const lipstickAngle = (rotationDeg % 360) * (Math.PI / 180);
-  const skewX = Math.sin(lipstickAngle) * 8;
-  const scaleX = 0.85 + Math.abs(Math.cos(lipstickAngle)) * 0.15;
-  const highlightX = 28 + Math.sin(lipstickAngle) * 18;
+import { Canvas, useFrame } from "@react-three/fiber";
+import { PerspectiveCamera, Environment, Float, ContactShadows } from "@react-three/drei";
+import * as THREE from "three";
+
+function ThreeBottle({ rotationY }: { rotationY: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame(() => {
+    if (groupRef.current) {
+      // Smoothly interpolate rotation
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        groupRef.current.rotation.y,
+        rotationY * (Math.PI / 180),
+        0.1
+      );
+    }
+  });
 
   return (
-    <svg viewBox="0 0 120 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_30px_60px_rgba(201,160,110,0.5)]">
-      <defs>
-        <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#b8956a" />
-          <stop offset="40%" stopColor="#e8c88a" />
-          <stop offset="100%" stopColor="#9a7850" />
-        </linearGradient>
-        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#2a1a14" />
-          <stop offset="45%" stopColor="#4a2e22" />
-          <stop offset="100%" stopColor="#1a0e0a" />
-        </linearGradient>
-        <linearGradient id="bulletGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#8a3540" />
-          <stop offset="30%" stopColor="#c9606e" />
-          <stop offset="60%" stopColor="#e8909a" />
-          <stop offset="100%" stopColor="#7a2530" />
-        </linearGradient>
-        <radialGradient id="highlight" cx={`${highlightX}%`} cy="20%" r="35%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
+    <group ref={groupRef} position={[0, -1.5, 0]}>
+      {/* Bottle Body */}
+      <mesh position={[0, 1.2, 0]} castShadow>
+        <cylinderGeometry args={[0.8, 0.8, 2.4, 32]} />
+        <meshPhysicalMaterial
+          color="#1a0e0a"
+          metalness={0.9}
+          roughness={0.1}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+        />
+      </mesh>
+      
+      {/* Gold Band */}
+      <mesh position={[0, 2.45, 0]}>
+        <cylinderGeometry args={[0.82, 0.82, 0.1, 32]} />
+        <meshStandardMaterial color="#C9A06E" metalness={1} roughness={0.2} />
+      </mesh>
 
-      <g transform={`translate(60,160) skewX(${skewX}) scale(${scaleX},1) translate(-60,-160)`}>
-        <rect x="22" y="10" width="76" height="90" rx="6" fill="url(#capGrad)" />
-        <rect x="22" y="10" width="76" height="90" rx="6" fill="url(#highlight)" opacity="0.6" />
-        <rect x="26" y="14" width="68" height="82" rx="4" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-        <text x="60" y="60" textAnchor="middle" fontFamily="serif" fontStyle="italic" fontSize="9" fill="rgba(28,18,16,0.6)" letterSpacing="1">Sève</text>
+      {/* Cap */}
+      <mesh position={[0, 3.2, 0]} castShadow>
+        <cylinderGeometry args={[0.78, 0.78, 1.4, 32]} />
+        <meshPhysicalMaterial
+          color="#b8956a"
+          metalness={1}
+          roughness={0.15}
+          clearcoat={0.5}
+        />
+      </mesh>
+      
+      {/* Brand Text on Body */}
+      <mesh position={[0, 1.2, 0.81]}>
+        <planeGeometry args={[1, 0.4]} />
+        <meshBasicMaterial color="#C9A06E" transparent opacity={0.8} depthWrite={false}>
+          {/* We would use Text from drei, but keeping it simple to avoid missing font issues */}
+        </meshBasicMaterial>
+      </mesh>
+    </group>
+  );
+}
 
-        <rect x="28" y="100" width="64" height="16" rx="2" fill="#3a2818" />
-        <rect x="22" y="116" width="76" height="170" rx="4" fill="url(#bodyGrad)" />
-        <rect x="22" y="116" width="76" height="170" rx="4" fill="url(#highlight)" opacity="0.2" />
-        <rect x="30" y="200" width="60" height="1" fill="rgba(201,160,110,0.4)" />
-        <rect x="30" y="220" width="60" height="1" fill="rgba(201,160,110,0.2)" />
-        <text x="60" y="185" textAnchor="middle" fontFamily="serif" fontStyle="italic" fontSize="11" fill="rgba(201,160,110,0.7)" letterSpacing="2">ATELIER</text>
-        <text x="60" y="200" textAnchor="middle" fontFamily="serif" fontStyle="italic" fontSize="11" fill="rgba(201,160,110,0.7)" letterSpacing="2">SÈVE</text>
-
-        <ellipse cx="60" cy="116" rx="38" ry="6" fill="#2a1a14" />
-        <path d="M22,110 Q60,95 98,110 L98,116 Q60,101 22,116 Z" fill="url(#bulletGrad)" />
-        <path d="M22,116 Q60,101 98,116 Q60,108 22,116 Z" fill="rgba(255,255,255,0.15)" />
-        <ellipse cx="60" cy="110" rx="38" ry="6" fill="url(#bulletGrad)" filter="url(#glow)" />
-        <path d="M28,110 Q60,90 92,110" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      </g>
-    </svg>
+function RotatingBottle({ rotationDeg }: { rotationDeg: number }) {
+  return (
+    <Canvas className="w-full h-full" shadows>
+      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={40} />
+      <ambientLight intensity={0.5} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+      <Environment preset="city" />
+      <Float speed={2} rotationIntensity={0.1} floatIntensity={0.5}>
+        <ThreeBottle rotationY={rotationDeg} />
+      </Float>
+      <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={10} blur={2} far={4} />
+    </Canvas>
   );
 }
 
@@ -121,21 +137,23 @@ export function ProductShowcase() {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const trigger = ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: true,
-      onUpdate: (self) => { setRotation(self.progress * 360); },
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true,
+        onUpdate: (self) => { setRotation(self.progress * 360); },
+      });
+
+      gsap.fromTo(lipstickRef.current, { opacity: 0, y: 60 }, {
+        opacity: 1, y: 0, duration: 1, ease: "power3.out",
+        scrollTrigger: { trigger: containerRef.current, start: "top 75%" },
+      });
     });
 
-    gsap.fromTo(lipstickRef.current, { opacity: 0, y: 60 }, {
-      opacity: 1, y: 0, duration: 1, ease: "power3.out",
-      scrollTrigger: { trigger: containerRef.current, start: "top 75%" },
-    });
-
-    return () => { trigger.kill(); ScrollTrigger.getAll().forEach((s) => s.kill()); };
-  }, []);
+    return () => ctx.revert();
+  }, [t]);
 
   return (
     <section
@@ -165,7 +183,7 @@ export function ProductShowcase() {
               filter: `drop-shadow(0 40px 80px rgba(201,160,110,0.4))`,
             }}
           >
-            <RotatingLipstick rotationDeg={rotation} />
+            <RotatingBottle rotationDeg={rotation} />
           </div>
           <span className="font-sans text-xs uppercase tracking-widest" style={{ color: "#9E7B7B" }}>
             {ps.rotateHint}

@@ -4,46 +4,77 @@ import { gsap } from "gsap";
 export function LoadingScreen({ onDone }: { onDone: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const strokeRef = useRef<SVGPathElement>(null);
-  const logoRef = useRef<HTMLDivElement>(null);
+  const brushRef = useRef<SVGGElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+  const sublineRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(true);
 
   useEffect(() => {
-    if (!strokeRef.current || !containerRef.current) return;
+    if (!strokeRef.current || !brushRef.current || !containerRef.current) return;
 
     const path = strokeRef.current;
     const length = path.getTotalLength();
     path.style.strokeDasharray = `${length}`;
     path.style.strokeDashoffset = `${length}`;
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        gsap.to(containerRef.current, {
-          opacity: 0,
-          duration: 0.6,
-          ease: "power2.inOut",
-          onComplete: () => {
-            setMounted(false);
-            onDone();
-          },
-        });
-      },
-    });
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          gsap.to(containerRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setMounted(false);
+              onDone();
+            },
+          });
+        },
+      });
 
     tl.to(path, {
       strokeDashoffset: 0,
-      duration: 1.4,
+      duration: 1.6,
       ease: "power3.inOut",
+      onUpdate() {
+        if (!brushRef.current) return;
+        const point = path.getPointAtLength(length * this.progress());
+        brushRef.current.setAttribute("transform", `translate(${point.x - 16}, ${point.y - 12}) rotate(${this.progress() * 14})`);
+      },
     }, 0);
 
-    if (logoRef.current) {
-      tl.fromTo(logoRef.current,
-        { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-        0.8
-      );
-    }
+      const headlineSpans = headlineRef.current?.querySelectorAll("span");
+      if (headlineSpans?.length) {
+        tl.to(
+          headlineSpans,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.04,
+            ease: "power3.out",
+          },
+          1.0,
+        );
+      }
 
-    tl.to({}, { duration: 0.5 });
+      const sublineSpans = sublineRef.current?.querySelectorAll("span");
+      if (sublineSpans?.length) {
+        tl.to(
+          sublineSpans,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+            stagger: 0.02,
+            ease: "power3.out",
+          },
+          1.35,
+        );
+      }
+    });
+
+    return () => ctx.revert();
   }, [onDone]);
 
   if (!mounted) return null;
@@ -51,33 +82,65 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[999] flex flex-col items-center justify-center"
-      style={{ backgroundColor: "#1C1210" }}
+      className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[#1C1210]"
     >
-      <svg
-        viewBox="0 0 600 120"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-[80vw] max-w-[560px]"
-        style={{ overflow: "visible" }}
-      >
-        <path
-          ref={strokeRef}
-          d="M10,80 C60,10 120,110 180,60 C240,10 280,90 340,55 C400,20 440,95 500,50 C540,20 570,70 590,45"
-          stroke="#C9A06E"
-          strokeWidth="3"
-          strokeLinecap="round"
+      <div className="relative w-[80vw] max-w-[560px]">
+        <svg
+          viewBox="0 0 600 120"
           fill="none"
-          style={{ filter: "drop-shadow(0 0 8px rgba(201,160,110,0.7))" }}
-        />
-      </svg>
-      <div ref={logoRef} className="mt-8 opacity-0 flex flex-col items-center gap-2">
-        <span className="font-serif italic text-3xl" style={{ color: "#F9F4EE", letterSpacing: "0.04em" }}>
-          Atelier Sève
-        </span>
-        <span className="font-sans text-xs uppercase tracking-[0.3em]" style={{ color: "#C9A06E" }}>
-          Milano
-        </span>
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full overflow-visible"
+        >
+          <defs>
+            <linearGradient id="brushStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#E8C4B8" />
+              <stop offset="100%" stopColor="#C9A06E" />
+            </linearGradient>
+          </defs>
+          <path
+            ref={strokeRef}
+            d="M10,80 C60,10 120,110 180,60 C240,10 280,90 340,55 C400,20 440,95 500,50 C540,20 570,70 590,45"
+            stroke="url(#brushStroke)"
+            strokeWidth="6"
+            strokeLinecap="round"
+            fill="none"
+            style={{ filter: "drop-shadow(0 0 14px rgba(201,160,110,0.55))" }}
+          />
+          <g ref={brushRef} transform="translate(0, 0)">
+            <image 
+              href="/brush.png" 
+              x="-20" 
+              y="-80" 
+              width="60" 
+              height="160"
+              style={{ transformOrigin: "20px 80px", transform: "rotate(30deg)" }}
+            />
+          </g>
+        </svg>
+        <div className="mt-8 text-center">
+          <div ref={headlineRef} className="font-serif italic text-4xl md:text-5xl text-[#F9F4EE] leading-tight tracking-[0.05em]">
+            {"Atelier Sève".split("").map((char, i) => (
+              <span 
+                key={i} 
+                className="inline-block opacity-0 translate-y-4"
+                style={{ width: char === " " ? "0.5rem" : "auto" }}
+              >
+                {char}
+              </span>
+            ))}
+          </div>
+          <div ref={sublineRef} className="font-sans uppercase text-xs tracking-[0.4em] text-[#C9A06E] mt-4">
+            {"Milano".split("").map((char, i) => (
+              <span 
+                key={i} 
+                className="inline-block opacity-0 translate-y-4"
+                style={{ width: char === " " ? "0.5rem" : "auto" }}
+              >
+                {char}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
