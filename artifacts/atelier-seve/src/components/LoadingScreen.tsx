@@ -39,10 +39,24 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
       onUpdate() {
         if (!brushRef.current) return;
         const point = path.getPointAtLength(length * this.progress());
-        brushRef.current.setAttribute("transform", `translate(${point.x - 16}, ${point.y - 12}) rotate(${this.progress() * 14})`);
+        
+        // Calculate the dynamic angle/tangent of the curve
+        const delta = 2;
+        const prevLen = Math.max(0, length * this.progress() - delta);
+        const nextLen = Math.min(length, length * this.progress() + delta);
+        const pPrev = path.getPointAtLength(prevLen);
+        const pNext = path.getPointAtLength(nextLen);
+        
+        const dx = pNext.x - pPrev.x;
+        const dy = pNext.y - pPrev.y;
+        const pathAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+        
+        // Organic sweep motion: base trailing tilt + dynamic curve leaning + subtle hand stroke sweep
+        const sweepAngle = -28 + pathAngle * 0.3 + Math.sin(this.progress() * Math.PI * 5) * 5;
+        
+        brushRef.current.setAttribute("transform", `translate(${point.x}, ${point.y}) rotate(${sweepAngle})`);
       },
     }, 0);
-
       const headlineSpans = headlineRef.current?.querySelectorAll("span");
       if (headlineSpans?.length) {
         tl.to(
@@ -109,11 +123,10 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
           <g ref={brushRef} transform="translate(0, 0)">
             <image 
               href="/brush.png" 
-              x="-20" 
-              y="-80" 
-              width="60" 
-              height="160"
-              style={{ transformOrigin: "20px 80px", transform: "rotate(30deg)" }}
+              x="-22.5" 
+              y="-5" 
+              width="45" 
+              height="175"
             />
           </g>
         </svg>
