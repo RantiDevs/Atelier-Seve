@@ -32,31 +32,32 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
         },
       });
 
-    tl.to(path, {
-      strokeDashoffset: 0,
-      duration: 1.6,
-      ease: "power3.inOut",
-      onUpdate() {
-        if (!brushRef.current) return;
-        const point = path.getPointAtLength(length * this.progress());
-        
-        // Calculate the dynamic angle/tangent of the curve
-        const delta = 2;
-        const prevLen = Math.max(0, length * this.progress() - delta);
-        const nextLen = Math.min(length, length * this.progress() + delta);
-        const pPrev = path.getPointAtLength(prevLen);
-        const pNext = path.getPointAtLength(nextLen);
-        
-        const dx = pNext.x - pPrev.x;
-        const dy = pNext.y - pPrev.y;
-        const pathAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-        
-        // Organic sweep motion: base trailing tilt + dynamic curve leaning + subtle hand stroke sweep
-        const sweepAngle = -28 + pathAngle * 0.3 + Math.sin(this.progress() * Math.PI * 5) * 5;
-        
-        brushRef.current.setAttribute("transform", `translate(${point.x}, ${point.y}) rotate(${sweepAngle})`);
-      },
-    }, 0);
+      tl.to(path, {
+        strokeDashoffset: 0,
+        duration: 1.6,
+        ease: "power3.inOut",
+        onUpdate() {
+          if (!brushRef.current) return;
+          const point = path.getPointAtLength(length * this.progress());
+          
+          // Calculate the dynamic angle/tangent of the curve
+          const delta = 2;
+          const prevLen = Math.max(0, length * this.progress() - delta);
+          const nextLen = Math.min(length, length * this.progress() + delta);
+          const pPrev = path.getPointAtLength(prevLen);
+          const pNext = path.getPointAtLength(nextLen);
+          
+          const dx = pNext.x - pPrev.x;
+          const dy = pNext.y - pPrev.y;
+          const pathAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+          
+          // Organic sweep motion: precise base trailing tilt + dynamic curve leaning + subtle hand stroke sweep
+          const sweepAngle = -16 + pathAngle * 0.28 + Math.sin(this.progress() * Math.PI * 5) * 4;
+          
+          brushRef.current.setAttribute("transform", `translate(${point.x}, ${point.y}) rotate(${sweepAngle})`);
+        },
+      }, 0);
+
       const headlineSpans = headlineRef.current?.querySelectorAll("span");
       if (headlineSpans?.length) {
         tl.to(
@@ -118,13 +119,17 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
             strokeWidth="6"
             strokeLinecap="round"
             fill="none"
-            style={{ filter: "drop-shadow(0 0 14px rgba(201,160,110,0.55))" }}
+            style={{ 
+              strokeDasharray: 1000, 
+              strokeDashoffset: 1000, 
+              filter: "drop-shadow(0 0 14px rgba(201,160,110,0.55))" 
+            }}
           />
-          <g ref={brushRef} transform="translate(0, 0)">
+          <g ref={brushRef} transform="translate(10, 80) rotate(-31.25)">
             <image 
               href="/brush.png" 
-              x="-22.5" 
-              y="-5" 
+              x="-23.81" 
+              y="0" 
               width="45" 
               height="175"
             />
